@@ -13,6 +13,7 @@ A production-like REST API demonstrating authentication, authorization, and CRUD
 - Consistent API response envelope
 - Request logging
 - Comprehensive test suite
+- OpenAPI/Swagger documentation
 
 ## Tech Stack
 
@@ -73,6 +74,15 @@ npm run dev
 The API will be running at `http://localhost:3000`
 
 ### Running Tests
+
+First, ensure the test database is initialized:
+
+```bash
+# Push schema to test database (first time only)
+DATABASE_URL="file:./prisma/test.db" npx prisma db push --skip-generate
+```
+
+Then run tests:
 
 ```bash
 npm test
@@ -257,6 +267,33 @@ curl http://localhost:3000/admin/projects \
 3. Run "Login" or "Register User" request - the token is automatically saved
 4. Subsequent requests will use the saved token
 
+## Swagger / OpenAPI Documentation
+
+Interactive API documentation is available at:
+
+- **Swagger UI**: http://localhost:3000/docs
+- **OpenAPI JSON**: http://localhost:3000/openapi.json
+
+### Using Swagger UI for Authentication
+
+1. Open http://localhost:3000/docs in your browser
+2. Use the `/auth/login` endpoint to get a JWT token
+3. Click the **Authorize** button (lock icon) at the top right
+4. Enter the token (without "Bearer " prefix)
+5. Click **Authorize** - all subsequent requests will include the token
+
+## Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `PORT` | Server port | `3000` |
+| `NODE_ENV` | Environment (`development`, `production`, `test`) | `development` |
+| `DATABASE_URL` | SQLite database path | `file:./dev.db` |
+| `JWT_SECRET` | Secret key for JWT signing (min 10 chars) | Required |
+| `JWT_EXPIRES_IN` | Token expiration time | `24h` |
+| `RATE_LIMIT_WINDOW_MS` | Rate limit window in ms | `900000` |
+| `RATE_LIMIT_MAX_REQUESTS` | Max requests per window | `100` |
+
 ## Running with Docker (Optional)
 
 ### Build and run
@@ -315,9 +352,12 @@ docker-compose down -v
 │   ├── services/
 │   │   ├── auth.service.ts
 │   │   └── projects.service.ts
-│   └── utils/
-│       ├── response.ts
-│       └── logger.ts
+│   ├── utils/
+│   │   ├── response.ts
+│   │   └── logger.ts
+│   └── docs/
+│       ├── openapi.ts
+│       └── schemas.ts
 ├── scripts/
 │   ├── curl_demo.sh
 │   └── curl_demo.bat
@@ -326,6 +366,7 @@ docker-compose down -v
 │   └── project-api.postman_environment.json
 └── tests/
     ├── setup.ts
+    ├── api.test.ts
     ├── auth.test.ts
     └── projects.test.ts
 ```

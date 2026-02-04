@@ -1,7 +1,14 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(npm run lint)",
+      "Bash(npm test)",
+      "Bash(set DATABASE_URL=file:./prisma/test.db)",
+      "Bash(npx prisma db push:*)",
+      "Bash(npx dotenv:*)",
+      "Bash($env:DATABASE_URL=\"file:./test.db\")",
+      "Bash(DATABASE_URL=\"file:./test.db\" npx prisma db push:*)"
     ]
   }
 }
