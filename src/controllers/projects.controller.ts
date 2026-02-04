@@ -78,7 +78,7 @@ export async function getById(
     if (!req.user) {
       throw new Error('User not authenticated');
     }
-    const { id } = req.params;
+    const id = String(req.params.id);
     const project = await projectsService.getProjectById(id, req.user.userId);
     sendSuccess(res, project, 200);
   } catch (error) {
@@ -95,7 +95,7 @@ export async function update(
     if (!req.user) {
       throw new Error('User not authenticated');
     }
-    const { id } = req.params;
+    const id = String(req.params.id);
     const input = updateProjectSchema.parse(req.body);
     const project = await projectsService.updateProject(id, req.user.userId, input);
     sendSuccess(res, project, 200);
@@ -113,7 +113,7 @@ export async function remove(
     if (!req.user) {
       throw new Error('User not authenticated');
     }
-    const { id } = req.params;
+    const id = String(req.params.id);
     await projectsService.deleteProject(id, req.user.userId);
     sendSuccess(res, { message: 'Project deleted successfully' }, 200);
   } catch (error) {

@@ -41,7 +41,7 @@ export async function deleteProject(
   next: NextFunction
 ): Promise<void> {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
     await projectsService.adminDeleteProject(id);
     sendSuccess(res, { message: 'Project deleted successfully' }, 200);
   } catch (error) {

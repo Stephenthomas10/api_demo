@@ -1,6 +1,6 @@
 import { PrismaClient, User } from '@prisma/client';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import * as jwt from 'jsonwebtoken';
 import { env } from '../config/env';
 import { AppError } from '../middleware/errorHandler';
 import { Errors } from '../utils/response';
@@ -123,14 +123,13 @@ export async function getCurrentUser(userId: string): Promise<UserResponse> {
 }
 
 function generateToken(user: User): string {
-  return jwt.sign(
-    {
-      userId: user.id,
-      role: user.role,
-    },
-    env.jwtSecret,
-    { expiresIn: env.jwtExpiresIn }
-  );
+  const payload = {
+    userId: user.id,
+    role: user.role,
+  };
+  return jwt.sign(payload, env.jwtSecret, {
+    expiresIn: env.jwtExpiresIn as jwt.SignOptions['expiresIn'],
+  });
 }
 
 export const authService = {
