@@ -8,7 +8,8 @@
       "Bash(npx prisma db push:*)",
       "Bash(npx dotenv:*)",
       "Bash($env:DATABASE_URL=\"file:./test.db\")",
-      "Bash(DATABASE_URL=\"file:./test.db\" npx prisma db push:*)"
+      "Bash(DATABASE_URL=\"file:./test.db\" npx prisma db push:*)",
+      "Bash(ls:*)"
     ]
   }
 }

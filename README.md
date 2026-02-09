@@ -352,6 +352,17 @@ docker-compose down -v
 │   ├── services/
 │   │   ├── auth.service.ts
 │   │   └── projects.service.ts
+│   ├── ports/                         # DIP: Abstract interfaces
+│   │   ├── userRepo.port.ts
+│   │   ├── projectRepo.port.ts
+│   │   ├── passwordHasher.port.ts
+│   │   └── tokenSigner.port.ts
+│   ├── adapters/                      # DIP: Concrete implementations
+│   │   ├── prismaClient.ts
+│   │   ├── prismaUserRepo.ts
+│   │   ├── prismaProjectRepo.ts
+│   │   ├── bcryptHasher.ts
+│   │   └── jwtTokenSigner.ts
 │   ├── utils/
 │   │   ├── response.ts
 │   │   └── logger.ts
@@ -370,6 +381,75 @@ docker-compose down -v
     ├── auth.test.ts
     └── projects.test.ts
 ```
+
+## Architecture: Dependency Inversion Principle (DIP)
+
+This project follows the **Dependency Inversion Principle** using the **Ports and Adapters** (Hexagonal Architecture) pattern.
+
+### Key Concepts
+
+- **Ports** (`src/ports/`): Abstract interfaces that define contracts for external dependencies
+- **Adapters** (`src/adapters/`): Concrete implementations of those interfaces
+- **Services** (`src/services/`): Business logic that depends only on port interfaces, not concrete implementations
+
+### Port Interfaces
+
+| Port | Purpose |
+|------|---------|
+| `IUserRepository` | User data access operations |
+| `IProjectRepository` | Project data access operations |
+| `IPasswordHasher` | Password hashing and comparison |
+| `ITokenSigner` | JWT token signing |
+
+### Adapter Implementations
+
+| Adapter | Implements | Description |
+|---------|-----------|-------------|
+| `prismaUserRepo` | `IUserRepository` | Prisma-based user repository |
+| `prismaProjectRepo` | `IProjectRepository` | Prisma-based project repository |
+| `bcryptHasher` | `IPasswordHasher` | bcrypt password hashing |
+| `jwtTokenSigner` | `ITokenSigner` | jsonwebtoken JWT signing |
+
+### Dependency Injection in Tests
+
+Services expose factory functions (`makeAuthService`, `makeProjectsService`) that accept dependencies, enabling easy mocking in tests:
+
+```typescript
+import { makeAuthService } from '../src/services/auth.service';
+
+// Create mock implementations
+const mockUserRepo: IUserRepository = {
+  findByEmail: jest.fn().mockResolvedValue(null),
+  findById: jest.fn().mockResolvedValue(mockUser),
+  create: jest.fn().mockResolvedValue(mockUser),
+};
+
+const mockHasher: IPasswordHasher = {
+  hash: jest.fn().mockResolvedValue('hashed'),
+  compare: jest.fn().mockResolvedValue(true),
+};
+
+const mockSigner: ITokenSigner = {
+  sign: jest.fn().mockReturnValue('mock-token'),
+};
+
+// Create service with mocked dependencies
+const authService = makeAuthService({
+  userRepo: mockUserRepo,
+  passwordHasher: mockHasher,
+  tokenSigner: mockSigner,
+});
+
+// Test without hitting real database or external services
+const result = await authService.login({ email: 'test@example.com', password: 'pass' });
+```
+
+### Benefits
+
+1. **Testability**: Easily mock dependencies for unit tests
+2. **Flexibility**: Swap implementations (e.g., different database, different auth provider)
+3. **Separation of Concerns**: Business logic is isolated from infrastructure details
+4. **Backward Compatibility**: Default exports maintain existing API contracts
 
 ## Development
 
